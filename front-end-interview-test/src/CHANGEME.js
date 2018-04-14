@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import RemineTable from './components/Table/RemineTable/RemineTable';
 import API from './API'
 
+// Helps set initial values
 let bedmin = 0; 
 let bedmax = 0;
 let bathmax = 0;
@@ -9,7 +10,7 @@ let bathmin = 0;
 
 class Test extends Component {
 
-    // This sets the initial state of object properties
+    // This sets the initial state
     state = {
         property: [],
         buildings: [],
@@ -21,7 +22,7 @@ class Test extends Component {
         list: []
     };
 
-    // This executes our API functions upon the loading of the page/server
+    // This executes our API functions
     componentDidMount() {
         this.getLocations();
         this.getBuildingTypes();
@@ -50,7 +51,7 @@ class Test extends Component {
             )
     };
 
-    // Set the min and max for beds
+    // This function sets the min and max for beds and baths
     init = () => {
         let beds = [];
         let baths = [];
@@ -65,7 +66,7 @@ class Test extends Component {
             baths.push(parseInt(this.state.property[i].baths, 10));
         };
 
-        //Makes
+       
         bedmax = Math.max.apply(null, beds);
         bathmax = Math.max.apply(null, baths);
         bedmin = Math.min.apply(null, beds);
@@ -89,6 +90,7 @@ class Test extends Component {
        
     };
 
+    // Filters lists based on specified ranges
     listFilter = () => {
         let list = [];
         let bed;
