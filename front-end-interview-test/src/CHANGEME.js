@@ -13,7 +13,7 @@ class Test extends Component {
     // This sets the initial state
     state = {
         property: [],
-        buildings: [],
+        buildingList: [],
         bedmax: 0,
         bedmin: 0,
         bathmax: 0,
@@ -46,7 +46,7 @@ class Test extends Component {
         API.getBuildingTypes()
             .then(res => 
                 this.setState({
-                    buildings: res.data
+                    buildingList: res.data
                 })
             )
     };
@@ -126,7 +126,7 @@ class Test extends Component {
             
             <select onChange={this.handleEvent} name="buildingTypeSelected">
                <option value="All">All</option>
-                     {this.state.buildings.map(building => (
+                     {this.state.buildingList.map(building => (
                    <option key={building.id} value={building.name}>
                     {building.name}
                    </option>
