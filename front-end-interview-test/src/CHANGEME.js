@@ -9,24 +9,26 @@ let bathmin = 0;
 
 class Test extends Component {
 
+    // This sets the initial state of object properties
     state = {
         property: [],
         buildings: [],
         bedmax: 0,
-        bedmax: 0,
+        bedmin: 0,
         bathmax: 0,
-        bathdmin: 0,
-        buildingTypeSelected: 'All',
+        bathmin: 0,
+        buildingTypeSelected: "All",
         list: []
     };
 
+    // This executes our API functions upon the loading of the page/server
     componentDidMount() {
         this.getLocations();
         this.getBuildingTypes();
     }
 
  
-
+// API function that grabs property locations
     getLocations = () => {
         API.getLocations()
             .then(res => {
@@ -38,7 +40,7 @@ class Test extends Component {
             })
             .catch(err => console.log(err));
     };
-
+// API function that grabs the different building types
     getBuildingTypes = () => {
         API.getBuildingTypes()
             .then(res => 
@@ -48,53 +50,62 @@ class Test extends Component {
             )
     };
 
+    // Set the min and max for beds
     init = () => {
         let beds = [];
         let baths = [];
 
+        //Continues to loop through null 
         for (var i = 0; i < this.state.property.length; i++){
             if(this.state.property[i].beds === null || this.state.property[i].baths === null) {
                 continue;
             }
+            // push bed and bath query into the arrays
             beds.push(parseInt(this.state.property[i].beds, 10));
             baths.push(parseInt(this.state.property[i].baths, 10));
         };
+
+        //Makes
         bedmax = Math.max.apply(null, beds);
         bathmax = Math.max.apply(null, baths);
         bedmin = Math.min.apply(null, beds);
         bathmin = Math.min.apply(null, baths);
 
+    
         this.setState({bedmax: Math.max.apply(null, beds)});
         this.setState({bedmin: Math.min.apply(null, beds)});
         this.setState({bathmax: Math.max.apply(null, baths)});
         this.setState({bathmin: Math.min.apply(null, baths)});
     };
 
+    // Handles all input values
     handleEvent = event => {
         if(event.target.value === ''){
             let blanks = eval(event.target.name);
             this.setState({[event.target.name]: blanks});
         } else {
-            this.set({[event.target.name] : event.target.value});
+            this.setState({[event.target.name] : event.target.value});
         }
+       
     };
 
     listFilter = () => {
         let list = [];
         let bed;
         let bath;
+      
         for (var i = 0; i < this.state.property.length; i++) {
             bed = this.state.property[i].beds === null ? 0 : this.state.property[i].beds;
-            bath = this.state.property.baths === null ? 0 : this.state.property[i].baths;
+            bath = this.state.property[i].baths === null ? 0 : this.state.property[i].baths;
 
             if (
-                (parseInt(bed, 10) >= this.state.bedmin && parseInt(bed, 10) <= this.state.bedmax) && (parseInt(bath, 10) >= this.state.bath && parseInt(bath, 10) <= this.state.bathmax)
+                (parseInt(bed, 10) >= this.state.bedmin && parseInt(bed, 10) <= this.state.bedmax) && (parseInt(bath, 10) >= this.state.bathmin && parseInt(bath, 10) <= this.state.bathmax)
             ) {
-                if (this.state.buildingTypeSelected === 'All') {
+                if (this.state.buildingTypeSelected === "All") {
                     list.push(this.state.property[i])
                 }
-                if (this.state.buildingTypeSelected !== 'All' && this.state.property[i].buildingType.name === this.state.buildingTypeSelected) {
-                    list.push(this.state.property[i])
+                if (this.state.buildingTypeSelected !== "All" && this.state.property[i].buildingType.name === this.state.buildingTypeSelected) {
+                    list.push(this.state.property[i]);
                 }
             } 
         }
@@ -104,16 +115,14 @@ class Test extends Component {
         return ( <div className = "testContainer">
             <div className = "filterContainer" >
             <h3 >Beds </h3> 
-            <input type="number" name="minbeds"
-                    placeholder="Min" onChange={this.handleEvent} /> <br /> <br />
-            <input type="number" name="maxbeds" placeholder="Max" onChange={this.handleEvent} />
+            <input type="number" name="bedmin" placeholder="Min" onChange={this.handleEvent} /> <br /> <br />
+            <input type="number" name="bedmax" placeholder="Max" onChange={this.handleEvent} />
             
             <h3 >Baths </h3>  
-                <input type="number" name="minbaths" placeholder="Min" onChange={this.handleEvent} /> <br /> <br />
-                <input type="number" name="maxbaths"
-                    placeholder="Max" onChange={this.handleEvent} /> <br /> <br />
+                <input type="number" name="bathmin" placeholder="Min" onChange={this.handleEvent} /> <br /> <br />
+                <input type="number" name="bathmax" placeholder="Max" onChange={this.handleEvent} /> <br /> <br />
             
-            <select onChange={this.handleEvent} name="selectBuildingType">
+            <select onChange={this.handleEvent} name="buildingTypeSelected">
                <option value="All">All</option>
                      {this.state.buildings.map(building => (
                    <option key={building.id} value={building.name}>
@@ -123,7 +132,7 @@ class Test extends Component {
             </select><br /><br />
             <button onClick={this.listFilter}>Submit</button> 
             </div> 
-            <RemineTable properties = { this.state.list } /> 
+            <RemineTable properties={this.state.list} /> 
             </div>
         );
     }
