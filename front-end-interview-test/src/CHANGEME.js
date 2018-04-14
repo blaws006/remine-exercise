@@ -1,25 +1,31 @@
-import React, {
-    Component
-} from 'react';
+import React, { Component } from 'react';
 import RemineTable from './components/Table/RemineTable/RemineTable';
 import API from './API'
 
+let bedmin = 0; 
+let bedmax = 0;
+let bathmax = 0;
+let bathmin = 0;
+
 class Test extends Component {
+
+    state = {
+        property: [],
+        buildings: [],
+        bedmax: 0,
+        bedmax: 0,
+        bathmax: 0,
+        bathdmin: 0,
+        buildingTypeSelected: 'All',
+        list: []
+    };
+
     componentDidMount() {
         this.getLocations();
         this.getBuildingTypes();
     }
 
-    state = {
-        property: [],
-        buildingTypes: [],
-        maxbeds: 0,
-        minbeds: 0,
-        maxbaths: 0,
-        minbaths: 0,
-        buildingTypeSelected: 'All',
-        list: []
-    }
+ 
 
     getLocations = () => {
         API.getLocations()
@@ -27,35 +33,97 @@ class Test extends Component {
                 this.setState({
                     property: res.data,
                     list: res.data
-                });
-
+                })
+                this.init();
             })
             .catch(err => console.log(err));
     };
 
     getBuildingTypes = () => {
         API.getBuildingTypes()
-            .then(res => {
+            .then(res => 
                 this.setState({
-                    buildingTypes: res.data
-                });
-            })
+                    buildings: res.data
+                })
+            )
     };
+
+    init = () => {
+        let beds = [];
+        let baths = [];
+
+        for (var i = 0; i < this.state.property.length; i++){
+            if(this.state.property[i].beds === null || this.state.property[i].baths === null) {
+                continue;
+            }
+            beds.push(parseInt(this.state.property[i].beds, 10));
+            baths.push(parseInt(this.state.property[i].baths, 10));
+        };
+        bedmax = Math.max.apply(null, beds);
+        bathmax = Math.max.apply(null, baths);
+        bedmin = Math.min.apply(null, beds);
+        bathmin = Math.min.apply(null, baths);
+
+        this.setState({bedmax: Math.max.apply(null, beds)});
+        this.setState({bedmin: Math.min.apply(null, beds)});
+        this.setState({bathmax: Math.max.apply(null, baths)});
+        this.setState({bathmin: Math.min.apply(null, baths)});
+    };
+
+    handleEvent = event => {
+        if(event.target.value === ''){
+            let blanks = eval(event.target.name);
+            this.setState({[event.target.name]: blanks});
+        } else {
+            this.set({[event.target.name] : event.target.value});
+        }
+    };
+
+    listFilter = () => {
+        let list = [];
+        let bed;
+        let bath;
+        for (var i = 0; i < this.state.property.length; i++) {
+            bed = this.state.property[i].beds === null ? 0 : this.state.property[i].beds;
+            bath = this.state.property.baths === null ? 0 : this.state.property[i].baths;
+
+            if (
+                (parseInt(bed, 10) >= this.state.bedmin && parseInt(bed, 10) <= this.state.bedmax) && (parseInt(bath, 10) >= this.state.bath && parseInt(bath, 10) <= this.state.bathmax)
+            ) {
+                if (this.state.buildingTypeSelected === 'All') {
+                    list.push(this.state.property[i])
+                }
+                if (this.state.buildingTypeSelected !== 'All' && this.state.property[i].buildingType.name === this.state.buildingTypeSelected) {
+                    list.push(this.state.property[i])
+                }
+            } 
+        }
+        this.setState({list: list})
+    }
     render() {
         return ( <div className = "testContainer">
             <div className = "filterContainer" >
-            <h3 >Beds </h3> <input name = "maxbeds"
-            placeholder = "Max" /> <br /> <br />
-            <input name = "minbeds"
-            placeholder = "Min" />
+            <h3 >Beds </h3> 
+            <input type="number" name="minbeds"
+                    placeholder="Min" onChange={this.handleEvent} /> <br /> <br />
+            <input type="number" name="maxbeds" placeholder="Max" onChange={this.handleEvent} />
+            
             <h3 >Baths </h3>  
-            < input name = "maxbaths"
-            placeholder = "Max" /> <br /> <br />
-            <input name = "minbaths"
-            placeholder = "Min" /> <br /> <br />
-            <button>Submit</button> 
+                <input type="number" name="minbaths" placeholder="Min" onChange={this.handleEvent} /> <br /> <br />
+                <input type="number" name="maxbaths"
+                    placeholder="Max" onChange={this.handleEvent} /> <br /> <br />
+            
+            <select onChange={this.handleEvent} name="selectBuildingType">
+               <option value="All">All</option>
+                     {this.state.buildings.map(building => (
+                   <option key={building.id} value={building.name}>
+                    {building.name}
+                   </option>
+               ))} 
+            </select><br /><br />
+            <button onClick={this.listFilter}>Submit</button> 
             </div> 
-            <RemineTable properties = { [] } /> 
+            <RemineTable properties = { this.state.list } /> 
             </div>
         );
     }
